@@ -26,6 +26,11 @@ export default {
   plugins: [
   ],
 
+  serverMiddleware: [
+    { path: '/api', handler: '~/server-middleware/api.js' }
+  ],
+
+
   // Auto import components: https://go.nuxtjs.dev/config-components
   components: true,
 
