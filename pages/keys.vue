@@ -2,7 +2,7 @@
   <div>
     <h1>Generate a keypair</h1>
     <v-btn @click="generateKey()">Generate...</v-btn>
-    <pre>{{keypair}}</pre>
+    <pre>{{keyPair}}</pre>
   </div>
 </template>
 
@@ -12,13 +12,17 @@ import { Ed25519VerificationKey2018 } from '@digitalbazaar/ed25519-verification-
 export default {
   data () {
     return {
-      keypair: {}
+    }
+  },
+  computed: {
+    keyPair () {
+      return this.$store.state.keyPair
     }
   },
   methods: {
     async generateKey () {
-      const keypair = await Ed25519VerificationKey2018.generate()
-      this.keypair = keypair
+      const keyPair = await Ed25519VerificationKey2018.generate()
+      this.$store.commit('setKeyPair', keyPair)
     }
   }
 }
