@@ -24,9 +24,9 @@
 
       <v-navigation-drawer v-model="drawer" app>
           <v-list>
-                <v-list-item link to="/">
-                    <v-icon>mdi-form-textbox</v-icon><p>&nbsp;</p>
-                    <v-list-item-title>...</v-list-item-title>
+                <v-list-item link to="/keys">
+                    <v-icon>mdi-key</v-icon><p>&nbsp;</p>
+                    <v-list-item-title>Manage Key Pair</v-list-item-title>
                 </v-list-item>
           </v-list>
       </v-navigation-drawer>
