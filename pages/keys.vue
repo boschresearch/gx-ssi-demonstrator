@@ -21,8 +21,13 @@ export default {
   },
   methods: {
     async generateKey () {
-      const keyPair = await Ed25519VerificationKey2018.generate()
-      this.$store.commit('setKeyPair', keyPair)
+      const keyPair = await Ed25519VerificationKey2018.generate({
+        id: 'http://localhost:3000/api/user/user1/key',
+        controller: 'http://localhost:3000/api/user/user1'
+      })
+      const keyPairExport = keyPair.export({ publicKey: true, privateKey: true })
+      keyPairExport['@context'] = 'https://w3id.org/security/v2' // TODO: do we need this
+      this.$store.commit('setKeyPair', keyPairExport)
     }
   }
 }

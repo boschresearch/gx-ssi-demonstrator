@@ -28,6 +28,14 @@
                     <v-icon>mdi-key</v-icon><p>&nbsp;</p>
                     <v-list-item-title>Manage Key Pair</v-list-item-title>
                 </v-list-item>
+                <v-list-item link to="/credentials">
+                    <v-icon>mdi-key</v-icon><p>&nbsp;</p>
+                    <v-list-item-title>Manage Credentials</v-list-item-title>
+                </v-list-item>
+                <v-list-item link to="/selfdescription">
+                    <v-icon>mdi-key</v-icon><p>&nbsp;</p>
+                    <v-list-item-title>Manage Self-Description</v-list-item-title>
+                </v-list-item>
           </v-list>
       </v-navigation-drawer>
 
