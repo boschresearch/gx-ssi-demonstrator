@@ -45,7 +45,7 @@ app.get('/user/:userid', (req, res) => {
   const userid = req.params.userid
   const userinfo = buildUserinfoFromId(userid)
   result = {
-    // '@context': 'https://w3id.org/security/v2', // TODO: do we need this here?
+    '@context': 'https://w3id.org/security/v2', // mandatory to get a proper verify result!
     id: userinfo.controller,
     authentication: [
       userinfo.keyid
