@@ -1,8 +1,19 @@
 <template>
   <div>
-    <h1>Credentials</h1>
-    <v-btn @click="createVC()">Create new</v-btn>
-    <pre>{{credential}}</pre>
+    <h1>Issue Organization Credential</h1>
+    <v-text-field
+      v-model="legalName"
+      hint="The legalName that is going to be issued"
+      label="Organization Name">
+    </v-text-field>
+    <v-text-field
+      v-model="holder"
+      hint="e.g. http://localhost/user1"
+      label="Holder / Receiver / Subject ID">
+    </v-text-field>
+    <v-btn @click="createVC()">Create</v-btn>
+    <br/><br/>
+    <v-btn alt small @click="copyToClipboard()" v-if="credential"><v-icon>mdi-content-copy</v-icon></v-btn><pre>{{credential}}</pre>
   </div>
 </template>
 
@@ -15,41 +26,56 @@ import { Ed25519Signature2018 } from '@digitalbazaar/ed25519-signature-2018'
 export default {
   data () {
     return {
-      credential: {}
+      legalName: '',
+      holder: '',
+      credential: null
     }
   },
   methods: {
     async createVC () {
-      const credential = {
-        '@context': [
-          'https://www.w3.org/2018/credentials/v1',
-          'https://w3id.org/traceability/v1'
-        ],
-        id: new Date().getTime().toString(),
-        type: ['VerifiableCredential'],
-        issuer: this.$store.state.keyPair.controller,
-        issuanceDate: '2010-01-01T19:23:24Z',
-        credentialSubject: {
-          id: this.$store.state.keyPair.controller,
-          type: ['LEIentity'],
-          legalName: 'Automotive Parts Unlimited'
+      try {
+        const credential = {
+          '@context': [
+            'https://www.w3.org/2018/credentials/v1',
+            'https://w3id.org/traceability/v1'
+          ],
+          id: new Date().getTime().toString(),
+          type: ['VerifiableCredential'],
+          issuer: this.$store.state.keyPair.controller,
+          issuanceDate: '2010-01-01T19:23:24Z',
+          credentialSubject: {
+            id: this.holder,
+            type: ['LEIentity'],
+            legalName: this.legalName
+          }
         }
+        console.log('credential', credential)
+
+        const keypairObj = this.$store.state.keyPair
+        console.log('keypairObj', keypairObj)
+        const keyPair = await Ed25519VerificationKey2018.from(keypairObj)
+        const suite = new Ed25519Signature2018({
+          verificationMethod: keypairObj.id,
+          controller: keypairObj.controller,
+          key: keyPair
+        })
+        console.log('suite', suite)
+
+        const verifiableCredential = await vc.issue({
+          credential,
+          suite,
+          compactProof: false, // security-v2 issues
+          documentLoader: jsonld.documentLoaders.xhr()
+        })
+        console.log('verifiableCredential', verifiableCredential)
+        this.credential = verifiableCredential
+      } catch (e) {
+        console.log('catch', JSON.stringify(e, null, 4))
+        console.log('catch2', e)
       }
-
-      const keyPair = await Ed25519VerificationKey2018.from(this.$store.state.keyPair)
-      const suite = new Ed25519Signature2018({
-        verificationMethod: this.$store.state.keyPair.id,
-        controller: this.$store.state.keyPair.controller,
-        key: keyPair
-      })
-
-      const verifiableCredential = await vc.issue({
-        credential,
-        suite,
-        compactProof: false, // security-v2 issues
-        documentLoader: jsonld.documentLoaders.xhr
-      })
-      this.credential = verifiableCredential
+    },
+    copyToClipboard () {
+      navigator.clipboard.writeText(JSON.stringify(this.credential, null, 4))
     }
   }
 
