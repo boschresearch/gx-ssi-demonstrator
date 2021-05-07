@@ -9,6 +9,7 @@ const path = require('path')
 const SERVER_BASE_URL = 'http://localhost:3000/api'
 const USER_BASE_DIR = './user/'
 const PUB_KEY_FILENAME = 'pubKey.json'
+const SELF_DESCRIPTION_FILENAME = 'selfdescription.json'
 
 app.use(session({
   secret: 'catalog-demo-secret',
@@ -59,16 +60,16 @@ app.post('/user/key', (req, res) => {
   // update the public key for the user of this session
   const userid = req.session.userid
   if (!userid) {
-    return res.status(404).json({ error: 'You need to fetch / generate a userinfo first. (No userid in your session yet)' })
+    return res.status(401).json({ error: 'You need to fetch / generate a userinfo first. (No userid in your session yet)' })
   }
   const { id, controller, publicKeyBase58, type } = req.body
   const userinfo = buildUserinfoFromId(userid)
   // check if uer is allowed to update
   if (id !== userinfo.keyid) {
-    return res.status(404).json({ error: 'Key ID does not match userinfo' })
+    return res.status(403).json({ error: 'Key ID does not match userinfo' })
   }
   if (controller !== userinfo.controller) {
-    return res.status(404).json({ error: 'Controller does not match userinfo' })
+    return res.status(403).json({ error: 'Controller does not match userinfo' })
   }
   // additional fields are not checked, which means those are allowd for now
   const newKeyObj = req.body
@@ -81,10 +82,34 @@ app.get('/user/:userid/key', (req, res) => {
   const userid = req.params.userid
   const keyFilePath = path.join(USER_BASE_DIR, userid, PUB_KEY_FILENAME)
   if(!fs.existsSync(keyFilePath)) {
-    return res.status(400).json({ error: 'User or key file for user does not exist' })
+    return res.status(404).json({ error: 'User or key file for user does not exist' })
   }
   const pubKey = JSON.parse(fs.readFileSync(keyFilePath))
   return res.json(pubKey)
+})
+
+app.post('/user/selfdescription', (req, res) => {
+  // publish the client side signed self-description
+  const userid = req.session.userid
+  if (!userid) {
+    return res.status(401).json({ error: 'You need to fetch / generate a userinfo first. (No userid in your session yet)' })
+  }
+  const userinfo = buildUserinfoFromId(userid)
+  const sd = req.body
+  // for now, a user is allowed to publish any SD they want. No futher content checks
+  const sdPath = path.join(USER_BASE_DIR, userid, SELF_DESCRIPTION_FILENAME)
+  fs.writeFileSync(sdPath, JSON.stringify(sd, null, 4))
+  return res.json({ selfdescription: userinfo.selfdescription })
+})
+app.get('/user/:userid/selfdescription', (req, res) => {
+  // fetch the publicly avilable selfdescription for the given userid
+  const userid = req.params.userid
+  const sdFilePath = path.join(USER_BASE_DIR, userid, SELF_DESCRIPTION_FILENAME)
+  if(!fs.existsSync(sdFilePath)) {
+    return res.status(404).json({error: 'Self-Description for the given user does not exist'})
+  }
+  const sd = JSON.parse(fs.readFileSync(sdFilePath))
+  return res.json(sd)
 })
 
 const buildUserinfoFromId = function (userId) {

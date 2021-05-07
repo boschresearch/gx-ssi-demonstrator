@@ -6,7 +6,14 @@
       label="Copy / Paste your Verifiable Credential into here:"
       v-model="vc">
     </v-textarea>
-    <v-btn @click="addVC">Add</v-btn>
+    <v-btn @click="addVC()">Add</v-btn>
+    <v-btn v-if="presentation" @click="publishVP()">Publish Self-Description</v-btn>
+    <br/>
+    <v-row v-if="selfdescriptionLink">
+      <v-text-field readonly v-model="selfdescriptionLink"></v-text-field>
+      <v-btn alt small @click="copyToClipboardSelfDescriptionLink()"><v-icon>mdi-content-copy</v-icon></v-btn>
+      <v-btn :href="selfdescriptionLink" target="_blank">Open Self-Description...</v-btn>
+    </v-row>
     <br/>
     <p>Credentials: {{credentials.length}}</p>
     <v-btn @click="createVP()">Create Self-Description</v-btn>
@@ -27,6 +34,7 @@ export default {
     return {
       vc: '',
       credentials: [],
+      selfdescriptionLink: null,
       presentation: null
     }
   },
@@ -69,11 +77,17 @@ export default {
         console.log(JSON.stringify(e, null, 4))
       }
     },
-    publishVP () {
+    async publishVP () {
       console.log('publishVP')
+      const { data } = await this.$axios.post('/api/user/selfdescription', this.presentation)
+      console.log('publish self-description result: ', data)
+      this.selfdescriptionLink = data.selfdescription
     },
     copyToClipboard () {
       navigator.clipboard.writeText(JSON.stringify(this.presentation, null, 4))
+    },
+    copyToClipboardSelfDescriptionLink () {
+      navigator.clipboard.writeText(this.selfdescriptionLink)
     }
   }
 
