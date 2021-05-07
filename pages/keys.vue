@@ -32,7 +32,12 @@ export default {
       })
       const keyPairExport = keyPair.export({ publicKey: true, privateKey: true })
       keyPairExport['@context'] = 'https://w3id.org/security/v2' // TODO: do we need this
-      this.$store.commit('setKeyPair', keyPairExport)
+      this.$store.commit('setKeyPair', keyPairExport) // stores entire key, including private key
+      // send public key part to the server
+      const pubKeyExport = keyPair.export({ publicKey: true })
+      pubKeyExport['@context'] = 'https://w3id.org/security/v2' // TODO: do we need this
+      const { data } = await this.$axios.post('/api/user/key', pubKeyExport)
+      console.log('key publish result: ', data)
     },
     async getUser () {
       const { data } = await this.$axios.get('/api/userinfo')
