@@ -1,0 +1,11 @@
+version: '3.5'
+
+services:
+  catalog-demo:
+    build: .
+    image: catalog-demo:latest
+    restart: always
+    ports:
+      - "7600:3000"
+    environment:
+      - SERVER_BASE_URL=${SERVER_BASE_URL:-http://localhost:3000/api}

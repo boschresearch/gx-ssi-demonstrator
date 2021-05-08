@@ -49,7 +49,11 @@ export default {
   ],
 
   // Axios module configuration: https://go.nuxtjs.dev/config-axios
-  axios: {},
+  axios: {
+    // fix https://github.com/nuxt/create-nuxt-app/issues/641
+    // https://github.com/nuxt-community/axios-module/issues/308
+    baseURL: '/',
+  },
 
   // Vuetify module configuration: https://go.nuxtjs.dev/config-vuetify
   vuetify: {
@@ -70,6 +74,9 @@ export default {
     }
   },
 
+  server: {
+    host: '0.0.0.0'
+  },
   // Build Configuration: https://go.nuxtjs.dev/config-build
   build: {
   }

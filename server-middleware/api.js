@@ -6,7 +6,7 @@ const crypto = require('crypto')
 const fs = require('fs')
 const path = require('path')
 
-const SERVER_BASE_URL = 'http://localhost:3000/api'
+const SERVER_BASE_URL = process.env.SERVER_BASE_URL || 'http://localhost:3000/api'
 const USER_BASE_DIR = './user/'
 const PUB_KEY_FILENAME = 'pubKey.json'
 const SELF_DESCRIPTION_FILENAME = 'selfdescription.json'
@@ -134,6 +134,7 @@ const getNewUserId = function() {
 
 const initServer = function () {
   console.log('server started.')
+  console.log('using SERVER_BASE_URL: ', SERVER_BASE_URL)
 }
 
 initServer()
