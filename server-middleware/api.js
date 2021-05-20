@@ -6,6 +6,7 @@ const fs = require('fs')
 const path = require('path')
 
 const utils = require('./backend-utils')
+const didutils = require('./did')
 
 app.use(session({
   secret: 'catalog-demo-secret',
@@ -71,6 +72,14 @@ app.post('/user/key', (req, res) => {
   const newKeyObj = req.body
   const pubKeyFile = path.join(utils.USER_BASE_DIR, userid, utils.PUB_KEY_FILENAME)
   fs.writeFileSync(pubKeyFile, JSON.stringify(newKeyObj, null, 4))
+
+  // and now the did:web document if we have a did defined
+  if (userinfo.did) {
+    const diddoc = didutils.buildDidDocument(userinfo.did, newKeyObj.publicKeyBase58, newKeyObj.type)
+    const didwebDocFile = path.join(utils.USER_BASE_DIR, userid, utils.DID_WEB_DOC_FILENAME)
+    fs.writeFileSync(didwebDocFile, JSON.stringify(diddoc, null, 4))
+  }
+
   res.json({})
 })
 app.get('/user/:userid/key', (req, res) => {
@@ -82,6 +91,15 @@ app.get('/user/:userid/key', (req, res) => {
   }
   const pubKey = JSON.parse(fs.readFileSync(keyFilePath))
   return res.json(pubKey)
+})
+app.get('/user/:userid/did.json', (req, res) => {
+  const userid = req.params.userid
+  const diddocFilePath = path.join(utils.USER_BASE_DIR, userid, utils.DID_WEB_DOC_FILENAME)
+  if (!fs.existsSync(diddocFilePath)) {
+    return res.status(404).json({ error: 'DID Document for the given user does not exist. userid: ' + userid })
+  }
+  const diddoc = JSON.parse(fs.readFileSync(diddocFilePath))
+  return res.json(diddoc)
 })
 
 app.post('/user/selfdescription', (req, res) => {

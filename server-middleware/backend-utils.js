@@ -6,6 +6,7 @@ const path = require('path')
 const SERVER_BASE_URL = process.env.SERVER_BASE_URL || 'http://localhost:3000/api'
 const USER_BASE_DIR = './user/'
 const PUB_KEY_FILENAME = 'pubKey.json'
+const DID_WEB_DOC_FILENAME = 'didweb_did_doc.json'
 const SELF_DESCRIPTION_FILENAME = 'selfdescription.json'
 
 const buildUserinfoFromId = function (userId) {
@@ -54,6 +55,7 @@ module.exports = {
   SERVER_BASE_URL,
   USER_BASE_DIR,
   PUB_KEY_FILENAME,
+  DID_WEB_DOC_FILENAME,
   SELF_DESCRIPTION_FILENAME,
   buildDidWebFromId,
   buildDidWebFromUrl,
