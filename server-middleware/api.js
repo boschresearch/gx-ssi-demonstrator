@@ -2,14 +2,10 @@ const bodyParser = require('body-parser')
 const session = require('express-session')
 const app = require('express')()
 const axios = require('axios').default
-const crypto = require('crypto')
 const fs = require('fs')
 const path = require('path')
 
-const SERVER_BASE_URL = process.env.SERVER_BASE_URL || 'http://localhost:3000/api'
-const USER_BASE_DIR = './user/'
-const PUB_KEY_FILENAME = 'pubKey.json'
-const SELF_DESCRIPTION_FILENAME = 'selfdescription.json'
+const utils = require('./backend-utils')
 
 app.use(session({
   secret: 'catalog-demo-secret',
@@ -33,17 +29,17 @@ app.get('/userinfo', (req, res) => {
   // get userinfo from the session or creates a new one
   let userid = req.session.userid
   if(! userid) {
-    userid = getNewUserId()
+    userid = utils.getNewUserId()
     req.session.userid = userid
   }
-  const userinfo = buildUserinfoFromId(userid)
+  const userinfo = utils.buildUserinfoFromId(userid)
   return res.json(userinfo)
 })
 
 app.get('/user/:userid', (req, res) => {
   // to fetch the "controller"
   const userid = req.params.userid
-  const userinfo = buildUserinfoFromId(userid)
+  const userinfo = utils.buildUserinfoFromId(userid)
   result = {
     '@context': 'https://w3id.org/security/v2', // mandatory to get a proper verify result!
     id: userinfo.controller,
@@ -63,7 +59,7 @@ app.post('/user/key', (req, res) => {
     return res.status(401).json({ error: 'You need to fetch / generate a userinfo first. (No userid in your session yet)' })
   }
   const { id, controller, publicKeyBase58, type } = req.body
-  const userinfo = buildUserinfoFromId(userid)
+  const userinfo = utils.buildUserinfoFromId(userid)
   // check if uer is allowed to update
   if (id !== userinfo.keyid) {
     return res.status(403).json({ error: 'Key ID does not match userinfo' })
@@ -73,14 +69,14 @@ app.post('/user/key', (req, res) => {
   }
   // additional fields are not checked, which means those are allowd for now
   const newKeyObj = req.body
-  const pubKeyFile = path.join(USER_BASE_DIR, userid, PUB_KEY_FILENAME)
+  const pubKeyFile = path.join(utils.USER_BASE_DIR, userid, utils.PUB_KEY_FILENAME)
   fs.writeFileSync(pubKeyFile, JSON.stringify(newKeyObj, null, 4))
   res.json({})
 })
 app.get('/user/:userid/key', (req, res) => {
   // fetch the public key for the user
   const userid = req.params.userid
-  const keyFilePath = path.join(USER_BASE_DIR, userid, PUB_KEY_FILENAME)
+  const keyFilePath = path.join(utils.USER_BASE_DIR, userid, utils.PUB_KEY_FILENAME)
   if(!fs.existsSync(keyFilePath)) {
     return res.status(404).json({ error: 'User or key file for user does not exist' })
   }
@@ -94,17 +90,17 @@ app.post('/user/selfdescription', (req, res) => {
   if (!userid) {
     return res.status(401).json({ error: 'You need to fetch / generate a userinfo first. (No userid in your session yet)' })
   }
-  const userinfo = buildUserinfoFromId(userid)
+  const userinfo = utils.buildUserinfoFromId(userid)
   const sd = req.body
   // for now, a user is allowed to publish any SD they want. No futher content checks
-  const sdPath = path.join(USER_BASE_DIR, userid, SELF_DESCRIPTION_FILENAME)
+  const sdPath = path.join(utils.USER_BASE_DIR, userid, utils.SELF_DESCRIPTION_FILENAME)
   fs.writeFileSync(sdPath, JSON.stringify(sd, null, 4))
   return res.json({ selfdescription: userinfo.selfdescription })
 })
 app.get('/user/:userid/selfdescription', (req, res) => {
   // fetch the publicly avilable selfdescription for the given userid
   const userid = req.params.userid
-  const sdFilePath = path.join(USER_BASE_DIR, userid, SELF_DESCRIPTION_FILENAME)
+  const sdFilePath = path.join(utils.USER_BASE_DIR, userid, utils.SELF_DESCRIPTION_FILENAME)
   if(!fs.existsSync(sdFilePath)) {
     return res.status(404).json({error: 'Self-Description for the given user does not exist'})
   }
@@ -112,29 +108,10 @@ app.get('/user/:userid/selfdescription', (req, res) => {
   return res.json(sd)
 })
 
-const buildUserinfoFromId = function (userId) {
-  const userBaseUrl = SERVER_BASE_URL + '/user/' + userId
-  return {
-    id: userId,
-    keyid: userBaseUrl + '/key',
-    controller: userBaseUrl,
-    selfdescription: userBaseUrl + '/selfdescription'
-  }
-}
-
-const getNewUserId = function() {
-  const id = crypto.randomBytes(5).toString('hex');
-  const userdir = path.join(USER_BASE_DIR, id)
-  if(fs.existsSync(userdir)) {
-    return getNewUserId() // recursively try to find a non-existing userid
-  }
-  fs.mkdirSync(userdir, { recursive: true })
-  return id
-}
 
 const initServer = function () {
   console.log('server started.')
-  console.log('using SERVER_BASE_URL: ', SERVER_BASE_URL)
+  console.log('using SERVER_BASE_URL: ', utils.SERVER_BASE_URL)
 }
 
 initServer()
