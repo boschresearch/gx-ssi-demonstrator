@@ -57,6 +57,6 @@ npx create-nuxt-app
 ## Docker Deployment
 ```
 docker-compose -f docker-compose-prod.yaml build
-docker save catalog-demo:latest | ssh root@<your-server> 'docker load'
+docker save gx-ssi-demonstrator:latest | ssh root@<your-server> 'docker load'
 scp docker-compose-prod.yaml root@<your-server>:<server-directory>/docker-compose.yaml
 ```

@@ -13,7 +13,7 @@
       color="primary"
       dark
     >
-      <v-btn to="/" text>Catalog Verifiable Credentials Demo</v-btn>
+      <v-btn to="/" text>Gaia-X SSI Demonstrator</v-btn>
       <v-spacer></v-spacer>
 
       <v-toolbar-items>

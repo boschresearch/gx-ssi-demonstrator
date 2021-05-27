@@ -17,7 +17,7 @@ const utils = require('./backend-utils')
 const didutils = require('./did')
 
 app.use(session({
-  secret: 'catalog-demo-secret',
+  secret: 'gx-ssi-demonstrator-secret',
   resave: false,
   saveUninitialized: true,
   cookie: { secure: false }

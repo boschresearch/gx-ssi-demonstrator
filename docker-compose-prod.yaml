@@ -1,9 +1,9 @@
 version: '3.5'
 
 services:
-  catalog-demo:
+  gx-ssi-demonstrator:
     build: .
-    image: catalog-demo:latest
+    image: gx-ssi-demonstrator:latest
     restart: always
     ports:
       - "7600:3000"
