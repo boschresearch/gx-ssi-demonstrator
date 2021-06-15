@@ -92,3 +92,4 @@ sw.*
 
 # project specific
 user
+.devcontainer
