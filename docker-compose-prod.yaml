@@ -6,6 +6,6 @@ services:
     image: gx-ssi-demonstrator:latest
     restart: always
     ports:
-      - "7600:3000"
+      - "127.0.0.1:7600:3000"
     environment:
       - SERVER_BASE_URL=${SERVER_BASE_URL:-http://localhost:3000/api}
